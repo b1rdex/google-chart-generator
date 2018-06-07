@@ -26,8 +26,10 @@ abstract class AbstractChart {
 <google-chart style="__STYLES__"
     type='__TYPE__'
     options='__OPTIONS__'
+    data='__DATA__'
     cols='__COLS__'
-    rows='__ROWS__'>
+    rows='__ROWS__'
+>
 </google-chart>
 TEMPLATE;
 
@@ -60,39 +62,39 @@ TEMPLATE;
         foreach ($this->getElementParameters() as $key => $values) {
             $params[$key] = is_array($values) ? json_encode($values, $this->jsonEncodeFlags) : $values;
         }
-        return str_replace(['__TYPE__', '__OPTIONS__', '__COLS__', '__ROWS__', '__STYLES__'], $params, $this->HTMLTemplate);
+        return str_replace(['__TYPE__', '__OPTIONS__', '__COLS__', '__ROWS__', '__DATA__', '__STYLES__'], $params, $this->HTMLTemplate);
     }
 
     protected function getElementParameters() {
         return [
             '__TYPE__' => $this->getChartName(),
             '__OPTIONS__' => $this->getOptions(),
-            '__COLS__' => $this->getCols(),
-            '__ROWS__' => $this->getRows(),
-            '__STYLES__' => $this->getFormattedStyles()
+            '__COLS__' => is_array($this->getData()) ? $this->getCols() : '',
+            '__ROWS__' => is_array($this->getData()) ? $this->getRows() : '',
+            '__DATA__' => is_string($this->getData()) ? $this->getData() : '',
+            '__STYLES__' => $this->getFormattedStyles(),
         ];
     }
 
-    protected function getCols() {
+    public function getCols() {
         $cols = [];
-        foreach ($this->getData() as $data) {
-            /** @var AbstractData $data */
-            $col = array_merge($data->getColumnOptions());
-            $cols[] = $col;
+        if (is_array($this->getData())) {
+            foreach ($this->getData() as $data) {
+                /** @var AbstractData $data */
+                $col = array_merge($data->getColumnOptions());
+                $cols[] = $col;
+            }
         }
 
         return $cols;
     }
 
-    protected function getRows() {
-        $rows = [];
-        foreach ($this->getData() as $data) {
-            /** @var AbstractData $data */
-            $rows[] = $data->getData();
-        }
-        return $rows;
+    abstract public function getRows();
+
+    public function setData($data) {
+        $this->data = $data;
     }
-    
+
     /**
      * Add data to the chart
      * 
@@ -318,7 +320,6 @@ TEMPLATE;
 
     
     abstract protected function getChartName();
-//
 //    abstract protected function getDataUrlPart();
     
 }

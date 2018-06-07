@@ -27,7 +27,7 @@ class PieChart extends AbstractChart {
         return $rows;
     }
 
-    protected function getCols() {
+    public function getCols() {
         return [['type' => 'string', 'label' => 'Title'], ['type' => 'number', 'label' => 'Value']];
     }
 

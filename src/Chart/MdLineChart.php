@@ -7,8 +7,8 @@ use GoogleChartGenerator\Chart\LineChart\Line;
 use GoogleChartGenerator\Font;
 use GoogleChartGenerator\Axis;
 
-class LineChart extends AbstractAxisChart {
+class MdLineChart extends AbstractAxisChart {
     protected function getChartName() {
-        return 'line';
+        return 'md-line';
     }
 }

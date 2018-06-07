@@ -31,7 +31,7 @@ abstract class AbstractAxisChart extends AbstractChart {
         $this->addAxis(new Axis(Axis::HORIZONTAL, ['title' => 'x']));
     }
 
-    protected function getRows() {
+    public function getRows() {
         $rows = [];
 
         list($minX, $maxX) = $this->getXDimensions();
@@ -52,15 +52,17 @@ abstract class AbstractAxisChart extends AbstractChart {
 
     private function getSingleRow($i) {
         $row = [$this->getMainAxisType() == self::DISCRETE ? "$i" : $i];
-        foreach ($this->getData() as $collection) {
-            /** @var SequenceData $collection */
-            $row[] = isset($collection[$i]) ? $collection[$i] : null;
+        if (is_array($this->getData())) {
+            foreach ($this->getData() as $collection) {
+                /** @var SequenceData $collection */
+                $row[] = isset($collection[$i]) ? $collection[$i] : null;
+            }
         }
         return $row;
     }
 
 
-    protected function getCols() {
+    public function getCols() {
         return array_merge([['type' => $this->getMainAxisType()]], parent::getCols());
     }
 
@@ -68,10 +70,12 @@ abstract class AbstractAxisChart extends AbstractChart {
         $options = parent::getOptions();
         $series = [];
 
-        foreach ($this->getData() as $index => $collection) {
-            /** @var SequenceData $collection */
-            if ($collection->getOptions()) {
-                $series[$index] = $collection->getOptions();
+        if (\is_array($this->getData())) {
+            foreach ($this->getData() as $index => $collection) {
+                /** @var SequenceData $collection */
+                if ($collection->getOptions()) {
+                    $series[$index] = $collection->getOptions();
+                }
             }
         }
 
@@ -169,19 +173,21 @@ abstract class AbstractAxisChart extends AbstractChart {
         $min = null;
         $max = null;
         foreach ($this->getAxes($dimension) as $axis) {
-            /** @var Axis $axis */
-            foreach ($this->getData() as $collection) {
-                if ($axis->getOption('minValue', null) == null) {
-                    $min = is_null($min) ? ($axis->isVertical() ? $collection->getMinY() : $collection->getMinX())
-                                         : min(($axis->isVertical() ? $collection->getMinY() : $collection->getMinX()), $min);
-                } else {
-                    $min = $axis->getMin();
-                }
-                if ($axis->getOption('minValue', null) == null) {
-                    $max = is_null($max) ? ($axis->isVertical() ? $collection->getMaxY() : $collection->getMaxX())
-                                         :  max(($axis->isVertical() ? $collection->getMaxY() : $collection->getMaxX()), $max);
-                } else {
-                    $max = $axis->getMax();
+            if (\is_array($this->getData())) {
+                /** @var Axis $axis */
+                foreach ($this->getData() as $collection) {
+                    if ($axis->getOption('minValue', null) == null) {
+                        $min = is_null($min) ? ($axis->isVertical() ? $collection->getMinY() : $collection->getMinX())
+                            : min(($axis->isVertical() ? $collection->getMinY() : $collection->getMinX()), $min);
+                    } else {
+                        $min = $axis->getMin();
+                    }
+                    if ($axis->getOption('minValue', null) == null) {
+                        $max = is_null($max) ? ($axis->isVertical() ? $collection->getMaxY() : $collection->getMaxX())
+                            : max(($axis->isVertical() ? $collection->getMaxY() : $collection->getMaxX()), $max);
+                    } else {
+                        $max = $axis->getMax();
+                    }
                 }
             }
         }
